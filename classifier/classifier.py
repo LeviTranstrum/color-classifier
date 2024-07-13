@@ -18,7 +18,7 @@ class Classifier:
         lowest_score = 1000.0
         label = None
         for index, value in enumerate(self.palette):
-            score = self._color_error(color, value[0])
+            score = self._color_error(color, value[1])
             if score < lowest_score:
                 lowest_score = score
                 label = int(index)
@@ -42,7 +42,7 @@ class Classifier:
             data[:, :, :] = color
             axs[idx].imshow(data, interpolation='nearest')
             axs[idx].axis('off')  # Hide the axes
-            axs[idx].set_title(self.palette[self.classify_hard(color)][0])
+            axs[idx].set_title(self.palette[self.classify(color)][0])
 
         # Hide any unused subplots if n is not a perfect square
         for idx in range(n, grid_size * grid_size):
@@ -52,17 +52,17 @@ class Classifier:
         matplotlib.pyplot.show()
 
     def show_palette(self):
-        self.visualize([item[1] for item in enumerate(self.palette)])
+        self.visualize([self.palette[i][1] for i in range(len(self.palette))])
 
     def generate_data(self, num):
         traindata = []
         for i in range(num):
             color = self.random_color()
-            traindata.append ({'color': color, 'label': self.classify_hard(color)})
+            traindata.append ([color, self.classify(color)])
             
         testdata = []
-        for key, value in self.palette.items():
-            testdata.append({'color': value['color'], 'label': key})
+        for i in range(len(self.palette)):
+            testdata.append([self.palette[i][1], i])
         
         os.makedirs(os.path.dirname(f"./data/{self.name}/train.json"), exist_ok=True)
         os.makedirs(os.path.dirname(f"./data/{self.name}/test.json"), exist_ok=True)
