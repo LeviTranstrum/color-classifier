@@ -28,21 +28,31 @@ class Classifier:
         random.seed(seed)
         return [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
 
-    def visualize(self, colors):
+    def visualize(self, colors, labels = None, title=None):
+        if labels is None:
+            labels=[]
+            for color in enumerate(colors):
+                labels.append([self.index_to_label(self.classify(color))])
+
+        if len(labels) != len(colors):
+            raise ValueError("colors and labels must have the same number of elements")
+
         # Determine grid size for plotting (simple square layout)
         n = len(colors)
         grid_size = int(np.ceil(np.sqrt(n)))
 
         fig, axs = matplotlib.pyplot.subplots(grid_size, grid_size, figsize=(grid_size*1.1, grid_size*1.1))
         axs = axs.flatten()  # Flatten the array of axes for easier indexing
+        if title is not None:
+            fig.canvas.manager.set_window_title(title)
 
         # Plot each color
-        for idx, color in enumerate(colors):
+        for i in range(len(colors)):
             data = np.zeros((10, 10, 3), dtype=np.uint8)
-            data[:, :, :] = color
-            axs[idx].imshow(data, interpolation='nearest')
-            axs[idx].axis('off')  # Hide the axes
-            axs[idx].set_title(self.palette[self.classify(color)][0])
+            data[:, :, :] = colors[i]
+            axs[i].imshow(data, interpolation='nearest')
+            axs[i].axis('off')  # Hide the axes
+            axs[i].set_title(labels[i])
 
         # Hide any unused subplots if n is not a perfect square
         for idx in range(n, grid_size * grid_size):
@@ -52,33 +62,38 @@ class Classifier:
         matplotlib.pyplot.show()
 
     def show_palette(self):
-        self.visualize([self.palette[i][1] for i in range(len(self.palette))])
+        self.visualize([self.palette[i][1] for i in range(len(self.palette))],
+                       [self.palette[i][0] for i in range(len(self.palette))])
 
-    def generate_data(self, num):
-        traindata = []
+    def index_to_label(self, index):
+        return self.palette[index][0]
+
+    def generate_data(self, num=100000):
+        train_data = []
         for i in range(num):
             color = self.random_color()
-            traindata.append ([color, self.classify(color)])
-            
-        testdata = []
+            train_data.append ([color, self.classify(color)])
+
+        validate_data = []
         for i in range(len(self.palette)):
-            testdata.append([self.palette[i][1], i])
-        
-        os.makedirs(os.path.dirname(f"./data/{self.name}/train.json"), exist_ok=True)
-        os.makedirs(os.path.dirname(f"./data/{self.name}/test.json"), exist_ok=True)
+            validate_data.append([self.palette[i][1], i])
 
-        with open(f"./data/{self.name}/train.json", mode="w") as trainfile:
-            json.dump(traindata, trainfile)
-        
-        with open(f"./data/{self.name}/test.json", mode="w") as testfile:
-            json.dump(testdata, testfile)
-        
-def test():
-    classifier = Classifier('geometric27-narrow')
-    classifier.show_palette()
-    colors = [classifier.random_color() for _ in range(100)]
-    classifier.visualize(colors)
+        train_path = f'./data/{self.name}/train.json'
+        validate_path = f'./data/{self.name}/validate.json'
 
-    classifier.generate_data(10000)
+        os.makedirs(os.path.dirname(train_path), exist_ok=True)
+        os.makedirs(os.path.dirname(validate_path), exist_ok=True)
 
-test()
+        with open(train_path, mode="w") as train_file:
+            json.dump(train_data, train_file)
+
+        with open(validate_path, mode="w") as validate_file:
+            json.dump(validate_data, validate_file)
+
+    @classmethod
+    def test():
+        print('testing classifier')
+        classifier = Classifier('geometric27-narrow')
+        classifier.show_palette()
+        colors = [classifier.random_color() for _ in range(100)]
+        classifier.visualize(colors)

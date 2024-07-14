@@ -1,5 +1,6 @@
 # models/__init__.py
 
-from .simple import SimpleModel
+from .simple_model import SimpleModel
+from .colorset import Colorset
 
-__all__ = ['SimpleModel']
+__all__ = ['SimpleModel', 'Colorset']
