@@ -1,14 +1,11 @@
-import torch
 from model import SimpleModel
 
 def main():
-    model = SimpleModel.load('geometric27-narrow')
+    model = SimpleModel.load('large')
 
-    model.run_training(3, visualize=True)
+    model.run_training(10, visualize=True)
 
-    model.run_validation('Trained Model Outputs')
-
-    model.save()
+    model.test()
 
 if __name__=="__main__":
     main()

@@ -91,7 +91,7 @@ class Classifier:
             json.dump(validate_data, validate_file)
 
     @classmethod
-    def test():
+    def test(cls):
         print('testing classifier')
         classifier = Classifier('geometric27-narrow')
         classifier.show_palette()

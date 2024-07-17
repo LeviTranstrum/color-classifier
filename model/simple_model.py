@@ -2,8 +2,6 @@ import torch
 import os
 from model.colorset import Colorset
 from classifier.classifier import Classifier
-from datetime import datetime
-
 
 class SimpleModel(torch.nn.Module):
     def __init__(self, dataset_name):
@@ -71,14 +69,15 @@ class SimpleModel(torch.nn.Module):
                     print(f'epoch {n+1} batch {i+1} average loss: {running_loss / 100}')
                     running_loss = 0.0
 
+            self.save()
             if visualize:
                 self.run_validation(f'epoch {n+1}')
 
-    def run_validation(self, title = None):
+    def run_validation(self, title=None):
         self.eval()
         validation_dataloader = torch.utils.data.DataLoader(self.validation_set,
                                                             batch_size=len(self.classifier.palette),
-                                                            shuffle=True)
+                                                            shuffle=False)
 
         for i, data in enumerate(validation_dataloader):
             batch = data
@@ -94,6 +93,13 @@ class SimpleModel(torch.nn.Module):
 
             self.classifier.visualize(colors, results, title)
 
+    def test(self, num_samples = 100):
+        self.eval()
+        colors = torch.tensor([self.classifier.random_color() for _ in range(num_samples)], dtype=torch.float32)
+        model_outputs = self(colors)
+        results = [self.classifier.index_to_label(torch.argmax(model_outputs[i]).item()) for i in range(num_samples)]
+        self.classifier.visualize(colors, results, f'{self.name} Model Test')
+
     def save(self):
         path = f'./trained_models/{self.name}'
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -108,12 +114,6 @@ class SimpleModel(torch.nn.Module):
         except:
             print(f'No trained model found with the name {dataset_name}. Creating a new model')
         return model
-
-    @classmethod
-    def test(cls):
-        print('testing SimpleModel')
-        model = SimpleModel('geometric27-narrow')
-        print(f'model params: {model.parameters()}')
 
 
 
