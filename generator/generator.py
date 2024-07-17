@@ -5,10 +5,10 @@ import random
 import matplotlib
 import os
 
-class Classifier:
+class Generator:
     def __init__(self, name):
         self.name = name
-        with open(f'./classifier/palettes/{name}.json') as palette:
+        with open(f'./generator/palettes/{name}.json') as palette:
             self.palette = json.load(palette)
 
     def _color_error(self, color1, color2):
@@ -92,8 +92,8 @@ class Classifier:
 
     @classmethod
     def test(cls):
-        print('testing classifier')
-        classifier = Classifier('geometric27-narrow')
-        classifier.show_palette()
-        colors = [classifier.random_color() for _ in range(100)]
-        classifier.visualize(colors)
+        print('testing generator')
+        generator = Generator('geometric27-narrow')
+        generator.show_palette()
+        colors = [generator.random_color() for _ in range(100)]
+        generator.visualize(colors)

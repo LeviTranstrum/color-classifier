@@ -1,19 +1,19 @@
 import torch
 import os
 from model.colorset import Colorset
-from classifier.classifier import Classifier
+from generator.generator import Generator
 
 class SimpleModel(torch.nn.Module):
     def __init__(self, dataset_name):
         super(SimpleModel, self).__init__()
 
         self.name = dataset_name
-        # classifier
-        self.classifier = Classifier(dataset_name)
+        # generator
+        self.generator = Generator(dataset_name)
 
         # model architecture
         self.norm = torch.nn.BatchNorm1d(3)
-        self.linear = torch.nn.Linear(3, len(self.classifier.palette))
+        self.linear = torch.nn.Linear(3, len(self.generator.palette))
 
         # optimizer and loss function
         self.lossfunc = torch.nn.CrossEntropyLoss()
@@ -23,7 +23,7 @@ class SimpleModel(torch.nn.Module):
         train_path = f'./data/{dataset_name}/train.json'
         validate_path = f'./data/{dataset_name}/validate.json'
         if not os.path.exists(train_path) or not os.path.exists(validate_path):
-            self.classifier.generate_data()
+            self.generator.generate_data()
         self.training_set = Colorset(train_path)
         self.validation_set = Colorset(validate_path)
 
@@ -76,7 +76,7 @@ class SimpleModel(torch.nn.Module):
     def run_validation(self, title=None):
         self.eval()
         validation_dataloader = torch.utils.data.DataLoader(self.validation_set,
-                                                            batch_size=len(self.classifier.palette),
+                                                            batch_size=len(self.generator.palette),
                                                             shuffle=False)
 
         for i, data in enumerate(validation_dataloader):
@@ -87,18 +87,18 @@ class SimpleModel(torch.nn.Module):
 
             colors = []
             results = []
-            for i in range(len(self.classifier.palette)):
+            for i in range(len(self.generator.palette)):
                 colors.append(inputs[i])
-                results.append(self.classifier.index_to_label(torch.argmax(outputs[i]).item()))
+                results.append(self.generator.index_to_label(torch.argmax(outputs[i]).item()))
 
-            self.classifier.visualize(colors, results, title)
+            self.generator.visualize(colors, results, title)
 
     def test(self, num_samples = 100):
         self.eval()
-        colors = torch.tensor([self.classifier.random_color() for _ in range(num_samples)], dtype=torch.float32)
+        colors = torch.tensor([self.generator.random_color() for _ in range(num_samples)], dtype=torch.float32)
         model_outputs = self(colors)
-        results = [self.classifier.index_to_label(torch.argmax(model_outputs[i]).item()) for i in range(num_samples)]
-        self.classifier.visualize(colors, results, f'{self.name} Model Test')
+        results = [self.generator.index_to_label(torch.argmax(model_outputs[i]).item()) for i in range(num_samples)]
+        self.generator.visualize(colors, results, f'{self.name} Model Test')
 
     def save(self):
         path = f'./trained_models/{self.name}'
