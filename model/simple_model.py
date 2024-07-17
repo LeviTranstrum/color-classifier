@@ -1,13 +1,15 @@
 import torch
 import os
-from models.colorset import Colorset
+from model.colorset import Colorset
 from classifier.classifier import Classifier
+from datetime import datetime
 
 
 class SimpleModel(torch.nn.Module):
     def __init__(self, dataset_name):
         super(SimpleModel, self).__init__()
 
+        self.name = dataset_name
         # classifier
         self.classifier = Classifier(dataset_name)
 
@@ -91,6 +93,16 @@ class SimpleModel(torch.nn.Module):
                 results.append(self.classifier.index_to_label(torch.argmax(outputs[i]).item()))
 
             self.classifier.visualize(colors, results, title)
+
+    def save(self):
+        path = f'./trained_models/{self.name}'
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        torch.save(self.state_dict(), f'{path}')
+
+    @classmethod
+    def load(dataset_name):
+        model = SimpleModel(dataset_name)
+        return model
 
     @classmethod
     def test():

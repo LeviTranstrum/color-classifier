@@ -1,4 +1,4 @@
-# models/__init__.py
+# model/__init__.py
 
 from .simple_model import SimpleModel
 from .colorset import Colorset
