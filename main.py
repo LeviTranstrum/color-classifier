@@ -3,7 +3,7 @@ from model import SimpleModel
 def main():
     model = SimpleModel.load('large')
 
-    model.run_training(10, visualize=True)
+    model.run_training(10, visualize=False)
 
     model.test()
 
