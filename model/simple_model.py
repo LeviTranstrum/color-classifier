@@ -100,12 +100,17 @@ class SimpleModel(torch.nn.Module):
         torch.save(self.state_dict(), f'{path}')
 
     @classmethod
-    def load(dataset_name):
+    def load(cls, dataset_name):
+        path = f'./trained_models/{dataset_name}'
         model = SimpleModel(dataset_name)
+        try:
+            model.load_state_dict(torch.load(path))
+        except:
+            print(f'No trained model found with the name {dataset_name}. Creating a new model')
         return model
 
     @classmethod
-    def test():
+    def test(cls):
         print('testing SimpleModel')
         model = SimpleModel('geometric27-narrow')
         print(f'model params: {model.parameters()}')
