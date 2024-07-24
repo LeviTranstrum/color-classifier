@@ -3,9 +3,9 @@ import os
 from model.colorset import Colorset
 from generator.generator import Generator
 
-class SimpleModel(torch.nn.Module):
+class LargeModel(torch.nn.Module):
     def __init__(self, dataset_name):
-        super(SimpleModel, self).__init__()
+        super(LargeModel, self).__init__()
 
         self.name = dataset_name
         # generator
@@ -14,7 +14,10 @@ class SimpleModel(torch.nn.Module):
         # model architecture
         # Batch norm has learnable parameters that trivialize the model architecture for this problem
         # self.norm = torch.nn.BatchNorm1d(3)
-        self.linear = torch.nn.Linear(3, len(self.generator.palette))
+        self.linear1 = torch.nn.Linear(3, 6)
+        self.activation = torch.nn.ReLU()
+        self.linear2 = torch.nn.Linear(6, 12)
+        self.linear3 = torch.nn.Linear(12, len(self.generator.palette))
 
         # optimizer and loss function
         self.lossfunc = torch.nn.CrossEntropyLoss()
@@ -30,7 +33,11 @@ class SimpleModel(torch.nn.Module):
 
     def forward(self, x):
         # x = self.norm(x)
-        x = self.linear(x)
+        x = self.linear1(x)
+        x = self.activation(x)
+        x = self.linear2(x)
+        x = self.activation(x)
+        x = self.linear3(x)
         return x
 
     def run_training(self, num_epochs = 1, visualize = False):
@@ -102,14 +109,14 @@ class SimpleModel(torch.nn.Module):
         self.generator.visualize(colors, results, f'{self.name} Model Test')
 
     def save(self):
-        path = f'./trained_models/simple/{self.name}'
+        path = f'./trained_models/large/{self.name}'
         os.makedirs(os.path.dirname(path), exist_ok=True)
         torch.save(self.state_dict(), f'{path}')
 
     @classmethod
     def load(cls, dataset_name):
-        path = f'./trained_models/simple/{dataset_name}'
-        model = SimpleModel(dataset_name)
+        path = f'./trained_models/large/{dataset_name}'
+        model = LargeModel(dataset_name)
         try:
             model.load_state_dict(torch.load(path))
         except:

@@ -1,12 +1,13 @@
-from model import SimpleModel
+from model import SimpleModel, MediumModel, LargeModel
 
 def main():
-    model = SimpleModel.load('large')
+    model = LargeModel.load('large')
 
-    model.run_training(10, visualize=False)
+    # model.run_training(10, visualize=False)
 
-    model.test()
+    # model.test()
 
+    model.run_validation()
 if __name__=="__main__":
     main()
 
