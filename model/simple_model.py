@@ -85,6 +85,7 @@ class SimpleModel(torch.nn.Module):
             inputs = batch[0]
 
             outputs = self(inputs)
+            print(f'--- Outputs ---\n{outputs}')
 
             colors = []
             results = []
@@ -105,6 +106,16 @@ class SimpleModel(torch.nn.Module):
         path = f'./trained_models/simple/{self.name}'
         os.makedirs(os.path.dirname(path), exist_ok=True)
         torch.save(self.state_dict(), f'{path}')
+
+    def info(self):
+        print(f'----- Overview -----\n{self}')
+        total_params = sum(p.numel() for p in self.parameters())
+        trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        print(f'----- Total Parameters -----\n{total_params}')
+        print(f'----- Trainable Parameters -----\n{trainable_params}')
+        print('----- Parameters -----\n')
+        for param in self.named_parameters():
+            print(param)
 
     @classmethod
     def load(cls, dataset_name):

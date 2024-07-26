@@ -13,11 +13,13 @@ class LargeModel(torch.nn.Module):
 
         # model architecture
         # Batch norm has learnable parameters that trivialize the model architecture for this problem
-        # self.norm = torch.nn.BatchNorm1d(3)
+        self.norm1 = torch.nn.BatchNorm1d(3)
         self.linear1 = torch.nn.Linear(3, 6)
-        self.activation = torch.nn.ReLU()
+        self.norm2 = torch.nn.BatchNorm1d(6)
         self.linear2 = torch.nn.Linear(6, 12)
+        self.norm3 = torch.nn.BatchNorm1d(12)
         self.linear3 = torch.nn.Linear(12, len(self.generator.palette))
+        self.activation = torch.nn.ReLU()
 
         # optimizer and loss function
         self.lossfunc = torch.nn.CrossEntropyLoss()
@@ -32,11 +34,13 @@ class LargeModel(torch.nn.Module):
         self.validation_set = Colorset(validate_path)
 
     def forward(self, x):
-        # x = self.norm(x)
+        x = self.norm1(x)
         x = self.linear1(x)
         x = self.activation(x)
+        x = self.norm2(x)
         x = self.linear2(x)
         x = self.activation(x)
+        x = self.norm3(x)
         x = self.linear3(x)
         return x
 
